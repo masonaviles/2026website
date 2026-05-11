@@ -49,9 +49,9 @@ export function HeroPanel() {
         <IconLinks />
       </div>
 
-      {/* Right column — hidden on phones to keep mobile single-column-clean.
-          Achievement count still shows in the status bar below. */}
-      <div className="hidden md:block">
+      {/* Right column — stacks below the hero on mobile (single column),
+          sits side-by-side at ≥1101px. */}
+      <div>
         <JsonBio />
         <div className="mt-3.5">
           <AchievementsPanel allowReset />
