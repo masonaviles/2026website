@@ -18,9 +18,9 @@ config.set_main_option("sqlalchemy.url", settings.database_url)
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Models will register themselves on this metadata as they're added
-# (import them here so Alembic autogenerate sees them):
-# from app.db.models import contact
+# Models register themselves on this metadata when imported.
+from app.db.models import Contact  # noqa: E402, F401
+
 target_metadata = Base.metadata
 
 
