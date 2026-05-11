@@ -5,7 +5,7 @@ from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
 from app.core.rate_limit import limiter
-from app.routers import contact, health
+from app.routers import ai_chat, contact, cover_letter, health
 
 app = FastAPI(
     title="mason.os API",
@@ -34,6 +34,8 @@ app.add_middleware(
 
 app.include_router(health.router)
 app.include_router(contact.router)
+app.include_router(ai_chat.router)
+app.include_router(cover_letter.router)
 
 
 @app.get("/")
