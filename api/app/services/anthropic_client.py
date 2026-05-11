@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import functools
 from pathlib import Path
+from typing import Any
 
 from anthropic import AsyncAnthropic
 
@@ -56,6 +57,55 @@ def chat_system_blocks(extra_instructions: str | None = None) -> list[dict]:
             "cache_control": {"type": "ephemeral"},
         },
     ]
+
+
+def usage_to_dict(usage: Any) -> dict[str, Any]:
+    """Normalize an Anthropic Usage object to a flat dict for the frontend.
+
+    SDK shape changed when multi-TTL caching shipped: `cache_creation` became
+    a nested object (`ephemeral_5m_input_tokens`, `ephemeral_1h_input_tokens`)
+    instead of a flat `cache_creation_input_tokens`. We dump everything the
+    SDK exposes and flatten the nested form into the legacy field name so
+    older clients keep working.
+    """
+    if hasattr(usage, "model_dump"):
+        try:
+            dumped: dict[str, Any] = usage.model_dump(exclude_none=False)
+        except Exception:
+            dumped = {}
+    else:
+        dumped = {}
+
+    for k in (
+        "input_tokens",
+        "output_tokens",
+        "cache_read_input_tokens",
+        "cache_creation_input_tokens",
+    ):
+        if k not in dumped:
+            v = getattr(usage, k, None)
+            if isinstance(v, int):
+                dumped[k] = v
+
+    cc = getattr(usage, "cache_creation", None) or dumped.get("cache_creation")
+    if cc is not None:
+        if hasattr(cc, "model_dump"):
+            try:
+                cc = cc.model_dump(exclude_none=False)
+            except Exception:
+                cc = {}
+        if isinstance(cc, dict):
+            total = sum(int(v) for v in cc.values() if isinstance(v, int))
+            if total or "cache_creation_input_tokens" not in dumped:
+                dumped["cache_creation_input_tokens"] = total
+            dumped["cache_creation"] = cc
+
+    dumped.setdefault("input_tokens", 0)
+    dumped.setdefault("output_tokens", 0)
+    dumped.setdefault("cache_creation_input_tokens", 0)
+    dumped.setdefault("cache_read_input_tokens", 0)
+
+    return dumped
 
 
 def cover_letter_system_blocks() -> list[dict]:

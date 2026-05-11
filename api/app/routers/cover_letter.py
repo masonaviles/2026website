@@ -14,6 +14,7 @@ from app.services.anthropic_client import (
     MODEL_LETTER,
     cover_letter_system_blocks,
     get_client,
+    usage_to_dict,
 )
 
 router = APIRouter(prefix="/api/ai", tags=["ai"])
@@ -56,16 +57,7 @@ async def _stream_letter(payload: CoverLetterIn) -> AsyncIterator[bytes]:
                 yield f"data: {json.dumps({'type': 'delta', 'text': text})}\n\n".encode()
 
             final = await stream.get_final_message()
-            usage = {
-                "input_tokens": final.usage.input_tokens,
-                "output_tokens": final.usage.output_tokens,
-                "cache_creation_input_tokens": getattr(
-                    final.usage, "cache_creation_input_tokens", 0
-                ),
-                "cache_read_input_tokens": getattr(
-                    final.usage, "cache_read_input_tokens", 0
-                ),
-            }
+            usage = usage_to_dict(final.usage)
             logger.info("ai.letter.usage %s", usage)
             yield f"data: {json.dumps({'type': 'done', 'usage': usage})}\n\n".encode()
     except Exception as exc:
