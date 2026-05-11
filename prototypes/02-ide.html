@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>mason.os — Prototype B · IDE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script>
+  // Theme init runs before paint to avoid flash of wrong theme.
+  (function(){
+    try {
+      var stored = localStorage.getItem('mason-os-theme');
+      var t = (stored === 'light' || stored === 'dark') ? stored :
+        (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      document.documentElement.setAttribute('data-theme', t);
+    } catch(e) { document.documentElement.setAttribute('data-theme', 'dark'); }
+  })();
+</script>
+<style>
+  :root {
+    /* Dark (default) */
+    --bg: #0b0c10;
+    --bg-2: #111218;
+    --panel: #14151c;
+    --panel-2: #1a1b24;
+    --stroke: #23242e;
+    --stroke-soft: #1d1e26;
+    --ink: #e7e8ee;
+    --ink-soft: #a4a7b3;
+    --ink-mute: #6c6f7c;
+    --accent: #7cf7c4;
+    --accent-2: #62d6f8;
+    --warn: #ffd166;
+    --danger: #ff7a90;
+    --gold: #f5d36a;
+    --selection: rgba(124,247,196,0.18);
+    --grid-line: rgba(255,255,255,0.018);
+    --body-tint-1: rgba(124,247,196,0.06);
+    --body-tint-2: rgba(98,214,248,0.06);
+    --window-shadow: 0 30px 80px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.02);
+    --topbar-grad: linear-gradient(180deg, #15161e, #101118);
+    --editor-grad: linear-gradient(180deg, #0f1017 0%, #0c0d13 100%);
+    --gutter-grad: linear-gradient(180deg, rgba(13,14,21,1), rgba(13,14,21,0.96));
+    --rail-bg: #0d0e15;
+    --tabs-bg: var(--bg);
+    --term-bg: #0a0b11;
+    --term-head-bg: #0d0e15;
+    --status-grad: linear-gradient(180deg, #0d0e15, #0a0b10);
+    --toast-shadow: 0 24px 60px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(124,247,196,0.08);
+    --rail-active: var(--panel-2);
+    --ach-track: #1f2029;
+    --ach-cell-bg: #1a1b24;
+    --ach-unlocked: linear-gradient(135deg, rgba(124,247,196,0.18), rgba(98,214,248,0.18));
+    --ach-unlocked-stroke: rgba(124,247,196,0.3);
+    --scrollbar: #20212b;
+    --scrollbar-hover: #2a2b36;
+    --trophy-grad: linear-gradient(135deg, rgba(245,211,106,0.25), rgba(124,247,196,0.25));
+    --trophy-stroke: rgba(245,211,106,0.3);
+    --eyebrow-bg: rgba(124,247,196,0.08);
+    --eyebrow-stroke: rgba(124,247,196,0.2);
+    --tab-active-bar: var(--accent);
+    --btn-primary-ink: #042b1f;
+    --btn-primary-shadow: 0 8px 22px -10px rgba(124,247,196,0.4);
+    --pulse-shadow: 0 0 8px rgba(124,247,196,0.6);
+  }
+  [data-theme="light"] {
+    --bg: #f5f4ef;
+    --bg-2: #ffffff;
+    --panel: #ffffff;
+    --panel-2: #f1f1eb;
+    --stroke: #e4e2d9;
+    --stroke-soft: #edeae0;
+    --ink: #1a1a20;
+    --ink-soft: #4a4a55;
+    --ink-mute: #8a8a93;
+    --accent: #0f9d6e;
+    --accent-2: #0969da;
+    --warn: #b88600;
+    --danger: #cf222e;
+    --gold: #a8580d;
+    --selection: rgba(15,157,110,0.18);
+    --grid-line: rgba(15,15,20,0.035);
+    --body-tint-1: rgba(15,157,110,0.06);
+    --body-tint-2: rgba(9,105,218,0.05);
+    --window-shadow: 0 30px 80px -30px rgba(15,15,20,0.22), 0 0 0 1px rgba(15,15,20,0.02);
+    --topbar-grad: linear-gradient(180deg, #fbfaf5, #f0efe9);
+    --editor-grad: linear-gradient(180deg, #fbfaf5 0%, #ffffff 100%);
+    --gutter-grad: linear-gradient(180deg, rgba(251,250,245,1), rgba(251,250,245,0.96));
+    --rail-bg: #faf9f4;
+    --tabs-bg: #ecebe4;
+    --term-bg: #fbfaf5;
+    --term-head-bg: #f0efe9;
+    --status-grad: linear-gradient(180deg, #f1f0ea, #e9e8e0);
+    --toast-shadow: 0 24px 60px -22px rgba(15,15,20,0.18), 0 0 0 1px rgba(15,157,110,0.06);
+    --rail-active: rgba(15,157,110,0.12);
+    --ach-track: #e6e5dc;
+    --ach-cell-bg: #f1f0ea;
+    --ach-unlocked: linear-gradient(135deg, rgba(15,157,110,0.16), rgba(9,105,218,0.12));
+    --ach-unlocked-stroke: rgba(15,157,110,0.32);
+    --scrollbar: #d6d4c9;
+    --scrollbar-hover: #c4c2b6;
+    --trophy-grad: linear-gradient(135deg, rgba(168,88,13,0.18), rgba(15,157,110,0.18));
+    --trophy-stroke: rgba(168,88,13,0.3);
+    --eyebrow-bg: rgba(15,157,110,0.08);
+    --eyebrow-stroke: rgba(15,157,110,0.22);
+    --tab-active-bar: var(--accent);
+    --btn-primary-ink: #ffffff;
+    --btn-primary-shadow: 0 8px 22px -10px rgba(15,157,110,0.45);
+    --pulse-shadow: 0 0 8px rgba(15,157,110,0.55);
+  }
+  html { transition: background-color .25s ease; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(900px 600px at 0% -10%, var(--body-tint-1), transparent 60%),
+      radial-gradient(700px 500px at 100% 0%, var(--body-tint-2), transparent 55%),
+      var(--bg);
+    min-height: 100%;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    transition: background-color .25s ease;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  ::selection { background: var(--selection); color: var(--ink); }
+
+  /* Window chrome */
+  .window {
+    position: relative; z-index: 1;
+    margin: 16px; height: calc(100vh - 32px);
+    background: var(--bg-2);
+    border: 1px solid var(--stroke);
+    border-radius: 12px;
+    box-shadow: var(--window-shadow);
+    display: grid;
+    grid-template-rows: 36px auto 1fr 26px;
+    overflow: hidden;
+    transition: background-color .25s ease, box-shadow .25s ease;
+  }
+  .topbar {
+    display: flex; align-items: center; gap: 14px;
+    padding: 0 14px; border-bottom: 1px solid var(--stroke);
+    background: var(--topbar-grad);
+    transition: background .25s ease, border-color .25s ease;
+  }
+  .traffic { display: flex; gap: 8px; }
+  .traffic span { width: 12px; height: 12px; border-radius: 50%; }
+  .traffic .r { background: #ff5f57; box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.4); }
+  .traffic .y { background: #febc2e; box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.4); }
+  .traffic .g { background: #28c840; box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.4); }
+  .topbar-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-mute); }
+  .topbar-title b { color: var(--ink-soft); font-weight: 600; }
+  .topbar-actions { margin-left: auto; display: flex; gap: 4px; }
+  .topbar-icon {
+    width: 26px; height: 22px; border-radius: 5px; display: grid; place-items: center;
+    color: var(--ink-mute); cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+    background: transparent; border: none;
+  }
+  .topbar-icon:hover { color: var(--ink); background: var(--panel-2); }
+
+  /* Tab bar */
+  .tabs {
+    display: flex; align-items: stretch;
+    border-bottom: 1px solid var(--stroke);
+    background: var(--tabs-bg);
+    transition: background .25s ease, border-color .25s ease;
+  }
+  .tab {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--ink-mute);
+    border-right: 1px solid var(--stroke);
+    cursor: pointer;
+    position: relative;
+    transition: color .15s ease, background .15s ease;
+  }
+  .tab:hover { color: var(--ink-soft); background: var(--panel); }
+  .tab.active {
+    color: var(--ink); background: var(--panel);
+  }
+  .tab.active::after {
+    content: ""; position: absolute; left: 0; right: 0; top: -1px;
+    height: 1px; background: var(--accent);
+  }
+  .tab .lang-dot { width: 8px; height: 8px; border-radius: 2px; background: var(--accent); }
+  .tab.tsx .lang-dot { background: var(--accent-2); }
+  .tab.md .lang-dot { background: #a472ff; }
+  [data-theme="light"] .tab.md .lang-dot { background: #6f42c1; }
+  .tab.py .lang-dot { background: var(--warn); }
+  .tab.css .lang-dot { background: var(--danger); }
+
+  /* Body grid: rail | editor */
+  .body { display: grid; grid-template-columns: 240px 1fr; min-height: 0; }
+
+  /* Rail / file tree */
+  .rail {
+    background: var(--rail-bg);
+    border-right: 1px solid var(--stroke);
+    padding: 14px 8px;
+    overflow-y: auto;
+    font-family: 'JetBrains Mono', monospace;
+    transition: background .25s ease, border-color .25s ease;
+  }
+  .rail-title {
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-mute); padding: 4px 10px 8px;
+  }
+  .rail-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 10px; font-size: 12px;
+    color: var(--ink-soft); cursor: pointer; border-radius: 6px;
+    transition: background .12s ease, color .12s ease;
+  }
+  .rail-row:hover { background: var(--panel); color: var(--ink); }
+  .rail-row.active { background: var(--rail-active); color: var(--accent); }
+  .rail-row .caret { color: var(--ink-mute); width: 10px; display: inline-block; }
+  .rail-row .ico { color: var(--ink-mute); width: 14px; display: inline-grid; place-items: center; }
+  .rail-row .ico svg { width: 12px; height: 12px; }
+  .rail-row .badge {
+    margin-left: auto; font-size: 10px; padding: 1px 6px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  }
+  .rail-row .badge.alt {
+    background: color-mix(in srgb, var(--accent-2) 14%, transparent);
+    color: var(--accent-2);
+    border-color: color-mix(in srgb, var(--accent-2) 28%, transparent);
+  }
+  .rail-section { margin-top: 14px; }
+
+  /* Editor area */
+  .editor {
+    overflow: auto;
+    background: var(--editor-grad);
+    position: relative;
+    transition: background .25s ease;
+  }
+  .gutter {
+    position: sticky; left: 0; top: 0;
+    width: 56px; padding: 24px 0;
+    color: var(--ink-mute); font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    text-align: right;
+    border-right: 1px solid var(--stroke-soft);
+    user-select: none;
+    background: var(--gutter-grad);
+    float: left;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  .gutter span { display: block; padding-right: 12px; line-height: 28px; }
+
+  .content { padding: 24px 32px 24px 24px; min-height: 100%; position: relative; }
+
+  /* Hero */
+  .hero {
+    display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; align-items: start;
+    padding: 8px 0 28px;
+  }
+  @media (max-width: 1100px) { .hero { grid-template-columns: 1fr; } }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--accent);
+    background: var(--eyebrow-bg);
+    border: 1px solid var(--eyebrow-stroke);
+    padding: 6px 10px; border-radius: 6px;
+  }
+  .eyebrow .pulse {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: var(--pulse-shadow);
+    animation: pulse 2s infinite;
+  }
+  .h1 {
+    margin: 18px 0 12px; font-size: clamp(36px, 4.6vw, 60px); line-height: 1.04; letter-spacing: -0.025em;
+    font-weight: 800;
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+  }
+  .h1 .grad {
+    background: linear-gradient(110deg, var(--ink) 0%, var(--accent) 50%, var(--accent-2) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .h1 .cursor {
+    display: inline-block; width: 0.5ch; height: 0.9em; background: var(--accent);
+    transform: translateY(8px); margin-left: 4px;
+    animation: blink 1.05s steps(1) infinite;
+  }
+  .tagline { font-size: 16px; line-height: 1.65; color: var(--ink-soft); max-width: 60ch; }
+  .tagline strong { color: var(--ink); font-weight: 600; }
+  .tagline em { color: var(--accent); font-style: normal; font-family: 'JetBrains Mono', monospace; font-size: 14px; padding: 0 2px; background: color-mix(in srgb, var(--accent) 12%, transparent); border-radius: 3px; }
+
+  .meta-grid {
+    margin: 22px 0 24px;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+    max-width: 580px;
+  }
+  @media (max-width: 700px) { .meta-grid { grid-template-columns: 1fr; } }
+  .meta-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: 8px;
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .meta-row .key { color: var(--ink-mute); min-width: 80px; }
+  .meta-row .val { color: var(--ink); }
+  .meta-row .val.ok { color: var(--accent); }
+
+  .ctas { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 11px 16px; border-radius: 8px; cursor: pointer;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500;
+    border: 1px solid transparent; transition: transform .12s ease, background .15s ease, border-color .15s ease;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--accent); color: var(--btn-primary-ink);
+    box-shadow: var(--btn-primary-shadow);
+  }
+  .btn-primary:hover { transform: translateY(-1px); filter: brightness(1.05); }
+  .btn-ghost {
+    background: var(--panel); color: var(--ink); border-color: var(--stroke);
+  }
+  .btn-ghost:hover { background: var(--panel-2); border-color: var(--ink-mute); }
+  .btn .arrow { transition: transform .15s ease; }
+  .btn:hover .arrow { transform: translateX(3px); }
+
+  .icon-row { display: flex; gap: 8px; }
+  .icon-link {
+    display: inline-grid; place-items: center; width: 36px; height: 36px;
+    border-radius: 8px; background: var(--panel); border: 1px solid var(--stroke);
+    color: var(--ink-soft); cursor: pointer; transition: color .15s ease, background .15s ease, border-color .15s ease, transform .15s ease;
+    text-decoration: none;
+  }
+  .icon-link:hover { color: var(--accent); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); transform: translateY(-2px); }
+  .icon-link svg { width: 16px; height: 16px; }
+
+  /* Right column: terminal-ish card */
+  .term {
+    background: var(--term-bg);
+    border: 1px solid var(--stroke);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px -22px rgba(0,0,0,0.45);
+    transition: background .25s ease, border-color .25s ease;
+  }
+  [data-theme="light"] .term { box-shadow: 0 20px 60px -22px rgba(15,15,20,0.12); }
+  .term-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; border-bottom: 1px solid var(--stroke);
+    background: var(--term-head-bg);
+    transition: background .25s ease, border-color .25s ease;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-mute);
+  }
+  .term-head .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: var(--pulse-shadow); }
+  .term-body {
+    padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.7;
+    color: var(--ink-soft);
+  }
+  .term-body .prompt { color: var(--accent); }
+  .term-body .prompt::before { content: "$ "; color: var(--ink-mute); }
+  .term-body .out { color: var(--ink); }
+  .term-body .key { color: var(--accent-2); }
+  .term-body .str { color: var(--gold); }
+  .term-body .com { color: var(--ink-mute); }
+  .term-body .num { color: var(--warn); }
+
+  .achievements-card {
+    margin-top: 14px; padding: 12px 14px;
+    background: var(--panel); border: 1px solid var(--stroke); border-radius: 10px;
+  }
+  .ach-head {
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-mute);
+    margin-bottom: 10px;
+  }
+  .ach-head b { color: var(--ink); font-weight: 600; }
+  .ach-bar { height: 6px; border-radius: 999px; background: var(--ach-track); overflow: hidden; transition: background .25s ease; }
+  .ach-bar > span { display: block; height: 100%; width: 9%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+  .ach-list { margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); gap: 6px; }
+  .ach-cell {
+    aspect-ratio: 1; border-radius: 6px;
+    background: var(--ach-cell-bg); border: 1px solid var(--stroke);
+    display: grid; place-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-mute);
+    transition: background .25s ease, border-color .25s ease;
+  }
+  .ach-cell.unlocked { background: var(--ach-unlocked); color: var(--accent); border-color: var(--ach-unlocked-stroke); }
+
+  /* Status bar */
+  .status {
+    display: flex; align-items: center; gap: 14px;
+    padding: 0 14px;
+    background: var(--status-grad);
+    border-top: 1px solid var(--stroke);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--ink-mute);
+    transition: background .25s ease, color .25s ease, border-color .25s ease;
+  }
+  .status .branch { color: var(--accent); }
+  .status .ok { color: var(--accent); }
+  .status .warn { color: var(--warn); }
+  .status .info { color: var(--accent-2); }
+  .status .item { display: inline-flex; align-items: center; gap: 6px; }
+  .status .sep { width: 1px; height: 12px; background: var(--stroke); }
+  .status .spacer { flex: 1; }
+  .status kbd {
+    background: var(--panel-2); border: 1px solid var(--stroke);
+    color: var(--ink-soft); padding: 1px 5px; border-radius: 4px; font-size: 10px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed; right: 28px; bottom: 50px; z-index: 50;
+    width: 320px;
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center;
+    box-shadow: var(--toast-shadow);
+    transform: translateX(120%); opacity: 0;
+    animation: toastIn .55s 1s cubic-bezier(.2,.7,.2,1) both;
+    transition: background .25s ease, border-color .25s ease, box-shadow .25s ease;
+  }
+  .toast::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--accent); border-radius: 10px 0 0 10px;
+  }
+  .trophy {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--trophy-grad);
+    display: grid; place-items: center; color: var(--gold);
+    border: 1px solid var(--trophy-stroke);
+    transition: background .25s ease, border-color .25s ease;
+  }
+  .toast-title { font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; }
+  .toast-name { font-size: 13px; font-weight: 600; color: var(--ink); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+  .toast-progress { font-size: 11px; color: var(--ink-mute); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+  /* Animations */
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 50%, transparent); }
+    70% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent) 0%, transparent); }
+    100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent); }
+  }
+  @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+  @keyframes toastIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+  /* Scrollbar */
+  .editor::-webkit-scrollbar, .rail::-webkit-scrollbar { width: 10px; height: 10px; }
+  .editor::-webkit-scrollbar-thumb, .rail::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
+  .editor::-webkit-scrollbar-thumb:hover, .rail::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); background-clip: content-box; }
+
+  /* Theme toggle */
+  .theme-toggle {
+    width: auto; padding: 0 8px; gap: 6px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--ink-soft);
+  }
+  .theme-toggle .ico-moon { display: none; }
+  .theme-toggle .ico-sun { display: block; }
+  [data-theme="light"] .theme-toggle .ico-sun { display: none; }
+  [data-theme="light"] .theme-toggle .ico-moon { display: block; }
+  .theme-toggle .label-dark { display: none; }
+  .theme-toggle .label-light { display: inline; }
+  [data-theme="light"] .theme-toggle .label-light { display: none; }
+  [data-theme="light"] .theme-toggle .label-dark { display: inline; }
+</style>
+</head>
+<body>
+
+<div class="window">
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="traffic" aria-hidden="true">
+      <span class="r"></span><span class="y"></span><span class="g"></span>
+    </div>
+    <div class="topbar-title"><b>mason.os</b> · gitaddmason.dev — main</div>
+    <div class="topbar-actions">
+      <button class="topbar-icon theme-toggle" id="themeToggle" type="button" title="Toggle theme" aria-label="Toggle theme">
+        <svg class="ico-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="ico-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+        <span class="label-light">light</span>
+        <span class="label-dark">dark</span>
+      </button>
+      <button class="topbar-icon" title="Search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </button>
+      <button class="topbar-icon" title="Inspector">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+      </button>
+      <button class="topbar-icon" title="Settings">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.4.5 1 .9 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Tabs -->
+  <nav class="tabs" aria-label="Open files">
+    <div class="tab tsx active"><span class="lang-dot"></span>profile.tsx</div>
+    <div class="tab tsx"><span class="lang-dot"></span>work.tsx</div>
+    <div class="tab md"><span class="lang-dot"></span>blog/index.mdx</div>
+    <div class="tab py"><span class="lang-dot"></span>api/main.py</div>
+    <div class="tab css"><span class="lang-dot"></span>system/tokens.css</div>
+  </nav>
+
+  <!-- Body -->
+  <div class="body">
+    <!-- Rail -->
+    <aside class="rail" aria-label="Workspace">
+      <div class="rail-title">Workspace</div>
+      <div class="rail-row active">
+        <span class="caret">▾</span>
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span>
+        ~/profile
+        <span class="badge">main</span>
+      </div>
+      <div class="rail-row">
+        <span class="caret">▸</span>
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span>
+        ~/work
+      </div>
+      <div class="rail-row">
+        <span class="caret">▸</span>
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span>
+        ~/projects
+      </div>
+      <div class="rail-row">
+        <span class="caret">▸</span>
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span>
+        ~/blog
+        <span class="badge alt">3</span>
+      </div>
+      <div class="rail-row">
+        <span class="caret">▸</span>
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span>
+        ~/system
+      </div>
+      <div class="rail-row">
+        <span class="caret">▸</span>
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span>
+        ~/playground
+      </div>
+      <div class="rail-row">
+        <span class="caret">▸</span>
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span>
+        ~/contact
+      </div>
+
+      <div class="rail-section">
+        <div class="rail-title">Outline</div>
+        <div class="rail-row">
+          <span class="caret"></span>
+          <span class="ico" style="color:var(--accent-2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg></span>
+          summary
+        </div>
+        <div class="rail-row">
+          <span class="caret"></span>
+          <span class="ico" style="color:var(--accent-2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></span>
+          stack
+        </div>
+        <div class="rail-row">
+          <span class="caret"></span>
+          <span class="ico" style="color:var(--accent-2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12c3-9 15-9 18 0"/><circle cx="12" cy="12" r="3"/></svg></span>
+          social
+        </div>
+      </div>
+
+      <div class="rail-section">
+        <div class="rail-title">Achievements · 1/11</div>
+        <div class="rail-row">
+          <span class="caret"></span>
+          <span class="ico" style="color:var(--gold)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 1 1-10 0V4z"/></svg></span>
+          hello_world
+        </div>
+        <div class="rail-row" style="opacity:0.55">
+          <span class="caret"></span>
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6m0-6-6 6"/></svg></span>
+          curious_cat (locked)
+        </div>
+        <div class="rail-row" style="opacity:0.55">
+          <span class="caret"></span>
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6m0-6-6 6"/></svg></span>
+          polyglot (locked)
+        </div>
+      </div>
+    </aside>
+
+    <!-- Editor / content -->
+    <main class="editor">
+      <div class="content">
+        <section class="hero">
+          <div>
+            <span class="eyebrow"><span class="pulse"></span>// available · remote · las vegas, nv</span>
+            <h1 class="h1">
+              <span class="grad">Hi, I&rsquo;m Mason.</span><br />
+              I build the web<br />like it ships at Apple<span class="cursor"></span>
+            </h1>
+            <p class="tagline">
+              <strong>12+ year software engineer.</strong> Senior full-stack &mdash; <em>React</em>, <em>TypeScript</em>, <em>Next.js</em>
+              up front and <em>Python</em> / <em>FastAPI</em> behind. I&rsquo;ve shipped at <strong>Apple</strong> via AKQA &amp; Level Studios,
+              <strong>Smartsheet</strong>, <strong>Amperity</strong>, and <strong>Uptime.com</strong>, and I write code with Claude as a co-author,
+              not a tool.
+            </p>
+
+            <div class="meta-grid">
+              <div class="meta-row"><span class="key">role</span><span class="val">Senior FE Engineer Lead</span></div>
+              <div class="meta-row"><span class="key">currently</span><span class="val">@ AKQA · Apple account</span></div>
+              <div class="meta-row"><span class="key">stack</span><span class="val">react · ts · py · ai</span></div>
+              <div class="meta-row"><span class="key">status</span><span class="val ok">accepting interviews</span></div>
+              <div class="meta-row"><span class="key">a11y</span><span class="val ok">WCAG 2.2 AA · 508</span></div>
+              <div class="meta-row"><span class="key">timezone</span><span class="val">PT · async-friendly</span></div>
+            </div>
+
+            <div class="ctas">
+              <a class="btn btn-primary" href="#">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+                ./resume.pdf
+              </a>
+              <a class="btn btn-ghost" href="#">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+                Contact
+                <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+              </a>
+            </div>
+
+            <div class="icon-row" aria-label="Profiles">
+              <a class="icon-link" href="#" title="GitHub" aria-label="GitHub">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.79 23.4c.6.11.82-.26.82-.58v-2.05c-3.34.73-4.04-1.6-4.04-1.6-.55-1.4-1.34-1.77-1.34-1.77-1.1-.75.08-.74.08-.74 1.21.09 1.85 1.25 1.85 1.25 1.08 1.85 2.83 1.31 3.52 1 .11-.78.42-1.31.77-1.61-2.67-.31-5.47-1.34-5.47-5.97 0-1.32.47-2.4 1.24-3.25-.13-.31-.54-1.55.11-3.22 0 0 1.01-.32 3.3 1.24a11.4 11.4 0 0 1 6 0c2.29-1.56 3.3-1.24 3.3-1.24.66 1.67.25 2.91.12 3.22.78.85 1.24 1.93 1.24 3.25 0 4.65-2.81 5.66-5.49 5.96.43.37.81 1.1.81 2.21v3.27c0 .32.22.7.83.58A12 12 0 0 0 12 .5z"/></svg>
+              </a>
+              <a class="icon-link" href="#" title="Email" aria-label="Email">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+              </a>
+              <a class="icon-link" href="#" title="Blog" aria-label="Blog">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4V4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>
+              </a>
+              <a class="icon-link" href="#" title="LinkedIn" aria-label="LinkedIn">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.22 8h4.56v15H.22V8zM8.96 8h4.37v2.05h.06c.61-1.16 2.1-2.38 4.32-2.38 4.62 0 5.47 3.04 5.47 7v8.33h-4.56v-7.39c0-1.76-.03-4.03-2.46-4.03-2.46 0-2.84 1.92-2.84 3.9V23H8.96V8z"/></svg>
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <div class="term" aria-label="whoami">
+              <div class="term-head"><span class="dot"></span>~/profile.json — terminal</div>
+              <div class="term-body">
+<span class="prompt">whoami</span>
+<span class="out">
+{
+  <span class="key">"name"</span>: <span class="str">"Mason Aviles"</span>,
+  <span class="key">"role"</span>: <span class="str">"Senior Full-Stack Engineer"</span>,
+  <span class="key">"yrs"</span>: <span class="num">12</span>,
+  <span class="key">"shipped_at"</span>: [<span class="str">"Apple"</span>, <span class="str">"Smartsheet"</span>, <span class="str">"Amperity"</span>],
+  <span class="key">"superpowers"</span>: [
+    <span class="str">"design-system fluency"</span>,
+    <span class="str">"AI-native workflow"</span>,
+    <span class="str">"email engineering"</span>
+  ],
+  <span class="com">// open to senior &amp; staff roles</span>
+  <span class="key">"available"</span>: <span class="num">true</span>
+}
+</span>
+              </div>
+            </div>
+
+            <div class="achievements-card" aria-label="Achievement progress">
+              <div class="ach-head">
+                <span><b>achievements</b> · 1 / 11 unlocked</span>
+                <span>9%</span>
+              </div>
+              <div class="ach-bar"><span></span></div>
+              <div class="ach-list">
+                <div class="ach-cell unlocked" title="hello_world">★</div>
+                <div class="ach-cell" title="curious_cat">·</div>
+                <div class="ach-cell" title="polyglot">·</div>
+                <div class="ach-cell" title="speed_reader">·</div>
+                <div class="ach-cell" title="power_user">·</div>
+                <div class="ach-cell" title="architect">·</div>
+                <div class="ach-cell" title="mailman">·</div>
+                <div class="ach-cell" title="whisperer">·</div>
+                <div class="ach-cell" title="recruiter">·</div>
+                <div class="ach-cell" title="egg_hunter">·</div>
+                <div class="ach-cell" title="completionist">?</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Status bar -->
+  <footer class="status" role="status" aria-live="polite">
+    <span class="item">⎇ <span class="branch">main</span></span>
+    <span class="sep" aria-hidden="true"></span>
+    <span class="item ok">● deployed 4m ago · netlify</span>
+    <span class="sep" aria-hidden="true"></span>
+    <span class="item info">⚡ Lighthouse 99/100/100/100</span>
+    <span class="sep" aria-hidden="true"></span>
+    <span class="item">↑ 7 commits · this week</span>
+    <span class="sep" aria-hidden="true"></span>
+    <span class="item warn">★ 1/11 achievements</span>
+    <span class="spacer"></span>
+    <span class="item">FastAPI · fly · ok</span>
+    <span class="sep" aria-hidden="true"></span>
+    <span class="item">powered by Claude</span>
+    <span class="sep" aria-hidden="true"></span>
+    <kbd>⌘K</kbd>
+  </footer>
+</div>
+
+<!-- Toast -->
+<aside class="toast" role="status" aria-live="polite">
+  <div class="trophy" aria-hidden="true">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 1 1-10 0V4z"/>
+      <path d="M17 5h3a3 3 0 0 1-3 3M7 5H4a3 3 0 0 0 3 3"/>
+    </svg>
+  </div>
+  <div>
+    <div class="toast-title">[ achievement.unlocked ]</div>
+    <div class="toast-name">hello_world</div>
+    <div class="toast-progress">first visit · 1/11 · keep exploring →</div>
+  </div>
+</aside>
+
+<script>
+  (function(){
+    var btn = document.getElementById('themeToggle');
+    if (!btn) return;
+    var html = document.documentElement;
+    function sync() {
+      btn.setAttribute('aria-pressed', String(html.getAttribute('data-theme') === 'light'));
+    }
+    sync();
+    btn.addEventListener('click', function(){
+      var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      try { localStorage.setItem('mason-os-theme', next); } catch(e) {}
+      sync();
+    });
+  })();
+</script>
+
+</body>
+</html>

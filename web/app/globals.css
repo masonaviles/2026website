@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+body {
+  background: #0b0c10;
+  color: #e7e8ee;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+[data-theme="light"] body {
+  background: #f5f4ef;
+  color: #1a1a20;
+}
+
+::selection {
+  background: rgba(124, 247, 196, 0.18);
+}

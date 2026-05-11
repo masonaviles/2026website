@@ -1,0 +1,37 @@
+# Fly.io configuration for mason.os api
+# Provision before first deploy:
+#   flyctl apps create mason-os-api
+#   flyctl volumes create mason_data --size 1 --region sjc -a mason-os-api
+#   flyctl secrets set ALLOWED_ORIGINS="https://gitaddmason.dev,http://localhost:3000" -a mason-os-api
+
+app = "mason-os-api"
+primary_region = "sjc"
+
+[build]
+
+[env]
+  DATABASE_URL = "sqlite+aiosqlite:////data/mason.db"
+  ENVIRONMENT = "production"
+
+[mounts]
+  source = "mason_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[http_service.checks]]
+  interval = "30s"
+  timeout = "5s"
+  grace_period = "10s"
+  method = "GET"
+  path = "/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
