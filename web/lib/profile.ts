@@ -102,6 +102,7 @@ export const profile: Profile = {
     yrs: 12,
     shippedAt: ["Apple", "Smartsheet", "Amperity"],
     superpowers: [
+      "modular component architecture",
       "design-system fluency",
       "AI-native workflow",
       "email engineering",
