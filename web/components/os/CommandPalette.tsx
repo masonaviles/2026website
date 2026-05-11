@@ -130,7 +130,8 @@ export function CommandPalette({ posts }: { posts: BlogLink[] }) {
     setCursor(0);
   }, [filtered.length]);
 
-  // Open / close shortcut.
+  // Open / close shortcut + external open event (used by the topbar search
+  // button so mobile users can trigger the palette without a keyboard).
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -138,8 +139,15 @@ export function CommandPalette({ posts }: { posts: BlogLink[] }) {
         setOpen((v) => !v);
       }
     }
+    function onExternalOpen() {
+      setOpen(true);
+    }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("mason-os:open-palette", onExternalOpen);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("mason-os:open-palette", onExternalOpen);
+    };
   }, []);
 
   // Focus the input + reset query when opened.

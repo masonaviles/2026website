@@ -26,7 +26,7 @@ const dotColor: Record<Lang, string> = {
 export function Tabs() {
   return (
     <nav
-      className="flex items-stretch border-b border-stroke"
+      className="scrollbar-themed flex items-stretch overflow-x-auto border-b border-stroke"
       style={{ background: "var(--tabs-bg)" }}
       aria-label="Open files"
     >
@@ -34,7 +34,7 @@ export function Tabs() {
         <div
           key={tab.name}
           className={clsx(
-            "relative flex cursor-pointer items-center gap-2 border-r border-stroke px-3.5 py-2 font-mono text-xs transition-colors",
+            "relative flex flex-shrink-0 cursor-pointer items-center gap-2 border-r border-stroke px-3.5 py-2 font-mono text-xs transition-colors",
             tab.active
               ? "bg-panel text-ink"
               : "text-ink-mute hover:bg-panel hover:text-ink-soft",

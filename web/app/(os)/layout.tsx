@@ -21,7 +21,7 @@ export default async function OsLayout({
   return (
     <>
       <div
-        className="relative z-10 m-4 grid h-[calc(100vh-32px)] overflow-hidden rounded-xl border border-stroke bg-bg-2"
+        className="relative z-10 grid h-screen overflow-hidden border-stroke bg-bg-2 lg:m-4 lg:h-[calc(100vh-32px)] lg:rounded-xl lg:border"
         style={{
           gridTemplateRows: "36px auto 1fr 26px",
           boxShadow: "var(--window-shadow)",
@@ -29,13 +29,15 @@ export default async function OsLayout({
       >
         <TopBar />
         <Tabs />
-        <div className="grid min-h-0" style={{ gridTemplateColumns: "240px 1fr" }}>
+        <div className="grid min-h-0 grid-cols-1 lg:grid-cols-[240px_1fr]">
           <Rail />
           <main
             className="scrollbar-themed overflow-auto"
             style={{ background: "var(--editor-grad)" }}
           >
-            <div className="relative min-h-full px-6 py-6">{children}</div>
+            <div className="relative min-h-full px-4 py-5 sm:px-6 sm:py-6">
+              {children}
+            </div>
           </main>
         </div>
         <StatusBar />

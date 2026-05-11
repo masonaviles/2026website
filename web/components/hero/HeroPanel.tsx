@@ -9,13 +9,13 @@ import { HeroCtas } from "./HeroCtas";
 export function HeroPanel() {
   return (
     <section
-      className="grid items-start gap-7 pb-7 pt-2 max-[1100px]:grid-cols-1"
+      className="grid items-start gap-6 pb-7 pt-1 sm:gap-7 sm:pt-2 max-[1100px]:grid-cols-1"
       style={{ gridTemplateColumns: "1.4fr 1fr" }}
     >
       {/* Left column */}
       <div>
         <Eyebrow text={profile.statusChip} />
-        <h1 className="my-3 text-[clamp(36px,4.6vw,60px)] font-extrabold leading-[1.04] tracking-tight">
+        <h1 className="my-3 text-[clamp(30px,5.2vw,60px)] font-extrabold leading-[1.05] tracking-tight">
           <span
             className="bg-clip-text text-transparent"
             style={{

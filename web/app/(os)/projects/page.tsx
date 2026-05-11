@@ -20,7 +20,7 @@ export default function ProjectsPage() {
         </p>
       </header>
 
-      <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(360px,1fr))]">
+      <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(280px,1fr))]">
         {PROJECTS.map((p) => (
           <ProjectCard key={p.id} project={p} />
         ))}

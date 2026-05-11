@@ -1,9 +1,10 @@
 "use client";
 
-import { Folder, Circle, Award } from "lucide-react";
+import { Folder, Circle, Award, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import { useEffect, useState } from "react";
 
 interface WorkspaceItem {
   label: string;
@@ -26,69 +27,157 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
+/**
+ * Rail renders two ways:
+ *   - On lg+ screens (≥1024px): inline sidebar column (always visible)
+ *   - Below lg: hidden by default; listens for the `mason-os:toggle-nav`
+ *     event and renders as a slide-out drawer overlay.
+ *
+ * The toggle event is decoupled (no shared state needed) — the
+ * Hamburger button dispatches; the Rail listens.
+ */
 export function Rail() {
   const pathname = usePathname() ?? "/";
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Toggle event listener — decoupled comms with the Hamburger button.
+  useEffect(() => {
+    const onToggle = () => setDrawerOpen((v) => !v);
+    const onClose = () => setDrawerOpen(false);
+    window.addEventListener("mason-os:toggle-nav", onToggle);
+    window.addEventListener("mason-os:close-nav", onClose);
+    return () => {
+      window.removeEventListener("mason-os:toggle-nav", onToggle);
+      window.removeEventListener("mason-os:close-nav", onClose);
+    };
+  }, []);
+
+  // Close drawer on route change. Reading the new pathname and clearing
+  // the open flag is the canonical sync-from-external-state pattern.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDrawerOpen(false);
+  }, [pathname]);
+
+  // Close on Esc when drawer is open.
+  useEffect(() => {
+    if (!drawerOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setDrawerOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [drawerOpen]);
+
+  const railBody = (
+    <div className="scrollbar-themed flex h-full flex-col gap-3 overflow-y-auto font-mono">
+      <div className="lg:hidden flex items-center justify-between px-1 pt-1">
+        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-mute">
+          workspace
+        </span>
+        <button
+          type="button"
+          onClick={() => setDrawerOpen(false)}
+          aria-label="Close menu"
+          className="grid h-7 w-7 place-items-center rounded-md text-ink-mute transition-colors hover:bg-panel-2 hover:text-ink"
+        >
+          <X size={14} />
+        </button>
+      </div>
+
+      <div>
+        <RailHeading className="hidden lg:block">Workspace</RailHeading>
+        <ul className="flex flex-col gap-0.5" role="list">
+          {WORKSPACE.map((item) => {
+            const active = isActive(pathname, item.href);
+            return (
+              <li key={item.label}>
+                <Link
+                  href={item.href}
+                  className={clsx(
+                    "flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs transition-colors",
+                    active ? "text-accent" : "text-ink-soft hover:bg-panel hover:text-ink",
+                  )}
+                  style={active ? { background: "var(--rail-active)" } : undefined}
+                  aria-current={active ? "page" : undefined}
+                >
+                  <span className="w-2.5 text-ink-mute">{active ? "▾" : "▸"}</span>
+                  <span className="grid w-3.5 place-items-center text-ink-mute">
+                    <Folder size={12} aria-hidden="true" />
+                  </span>
+                  <span className="flex-1">{item.label}</span>
+                  {item.badge && (
+                    <span
+                      className={clsx(
+                        "rounded-full border px-1.5 text-[10px] leading-tight",
+                        item.badge.tone === "accent"
+                          ? "border-[color-mix(in_srgb,var(--accent)_28%,transparent)] bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] text-accent"
+                          : "border-[color-mix(in_srgb,var(--accent-2)_28%,transparent)] bg-[color-mix(in_srgb,var(--accent-2)_14%,transparent)] text-accent-2",
+                      )}
+                    >
+                      {item.badge.text}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      <div>
+        <RailHeading>Outline</RailHeading>
+        <ul className="flex flex-col gap-0.5" role="list">
+          <OutlineRow>summary</OutlineRow>
+          <OutlineRow>stack</OutlineRow>
+          <OutlineRow>social</OutlineRow>
+        </ul>
+      </div>
+
+      <div>
+        <RailHeading>Achievements · 1/11</RailHeading>
+        <ul className="flex flex-col gap-0.5" role="list">
+          <AchievementRow unlocked label="hello_world" />
+          <AchievementRow label="curious_cat (locked)" />
+          <AchievementRow label="polyglot (locked)" />
+        </ul>
+      </div>
+    </div>
+  );
 
   return (
-    <aside
-      className="scrollbar-themed overflow-y-auto border-r border-stroke px-2 py-3.5 font-mono"
-      style={{ background: "var(--rail-bg)" }}
-      aria-label="Workspace"
-    >
-      <RailHeading>Workspace</RailHeading>
-      <ul className="flex flex-col gap-0.5" role="list">
-        {WORKSPACE.map((item) => {
-          const active = isActive(pathname, item.href);
-          return (
-            <li key={item.label}>
-              <Link
-                href={item.href}
-                className={clsx(
-                  "flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs transition-colors",
-                  active
-                    ? "text-accent"
-                    : "text-ink-soft hover:bg-panel hover:text-ink",
-                )}
-                style={active ? { background: "var(--rail-active)" } : undefined}
-                aria-current={active ? "page" : undefined}
-              >
-                <span className="w-2.5 text-ink-mute">{active ? "▾" : "▸"}</span>
-                <span className="grid w-3.5 place-items-center text-ink-mute">
-                  <Folder size={12} aria-hidden="true" />
-                </span>
-                <span className="flex-1">{item.label}</span>
-                {item.badge && (
-                  <span
-                    className={clsx(
-                      "rounded-full border px-1.5 text-[10px] leading-tight",
-                      item.badge.tone === "accent"
-                        ? "border-[color-mix(in_srgb,var(--accent)_28%,transparent)] bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] text-accent"
-                        : "border-[color-mix(in_srgb,var(--accent-2)_28%,transparent)] bg-[color-mix(in_srgb,var(--accent-2)_14%,transparent)] text-accent-2",
-                    )}
-                  >
-                    {item.badge.text}
-                  </span>
-                )}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+    <>
+      {/* Desktop inline rail */}
+      <aside
+        className="scrollbar-themed hidden overflow-y-auto border-r border-stroke px-2 py-3.5 font-mono lg:block"
+        style={{ background: "var(--rail-bg)" }}
+        aria-label="Workspace"
+      >
+        {railBody}
+      </aside>
 
-      <RailHeading className="mt-3.5">Outline</RailHeading>
-      <ul className="flex flex-col gap-0.5" role="list">
-        <OutlineRow>summary</OutlineRow>
-        <OutlineRow>stack</OutlineRow>
-        <OutlineRow>social</OutlineRow>
-      </ul>
-
-      <RailHeading className="mt-3.5">Achievements · 1/11</RailHeading>
-      <ul className="flex flex-col gap-0.5" role="list">
-        <AchievementRow unlocked label="hello_world" />
-        <AchievementRow label="curious_cat (locked)" />
-        <AchievementRow label="polyglot (locked)" />
-      </ul>
-    </aside>
+      {/* Mobile drawer */}
+      {drawerOpen && (
+        <div
+          className="fixed inset-0 z-40 lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Workspace"
+        >
+          <div
+            className="absolute inset-0 bg-black/55 backdrop-blur-sm"
+            onClick={() => setDrawerOpen(false)}
+            aria-hidden="true"
+          />
+          <aside
+            className="relative ml-0 h-full w-[280px] max-w-[80vw] overflow-y-auto border-r border-stroke px-2 py-3"
+            style={{ background: "var(--rail-bg)" }}
+          >
+            {railBody}
+          </aside>
+        </div>
+      )}
+    </>
   );
 }
 
