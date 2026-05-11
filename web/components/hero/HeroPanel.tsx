@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { profile } from "@/lib/profile";
 import { AchievementsPanel } from "@/components/achievements/AchievementsPanel";
+import { AvatarCard } from "./AvatarCard";
 import { Tagline } from "./Tagline";
 import { JsonBio } from "./JsonBio";
 import { IconLinks } from "./IconLinks";
@@ -82,11 +83,10 @@ export function HeroPanel() {
 
       {/* Right column — stacks below the hero on mobile (single column),
           sits side-by-side at ≥1101px. */}
-      <div>
+      <div className="flex flex-col gap-3.5">
+        <AvatarCard />
         <JsonBio />
-        <div className="mt-3.5">
-          <AchievementsPanel allowReset />
-        </div>
+        <AchievementsPanel allowReset />
       </div>
     </section>
   );
