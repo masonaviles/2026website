@@ -1,0 +1,61 @@
+---
+title: "Email engineering at scale: the sleeper skill that gets you hired"
+description: "How modular templates and session-cookie personalization cut campaign turnaround in half — and why almost no frontend portfolio ever shows this work."
+date: "2026-04-22"
+tags: ["email", "design-system", "marketing-site"]
+---
+
+If you've been doing frontend for more than five years, you've probably been handed an email project at some point. And if you're like most engineers, you fled the room.
+
+I get it. Email engineering is the Wild West: rendering engines from 1998, table-based layouts, inline styles, no JavaScript, and three completely different rules per client. Most engineers treat it as a hazing ritual to escape.
+
+That's exactly why it's a sleeper skill.
+
+## The 30-second pitch
+
+I've spent meaningful chunks of my career on email infrastructure — most recently leading the email engineering team at AKQA on a Fortune 500 account, and earlier building a modular system at Amperity that **cut campaign turnaround time in half** while letting marketing ship campaigns without engineering involvement.
+
+Almost no frontend portfolio ever shows this work. Which means if you can show it, you stand out.
+
+## What "modular email" actually means
+
+When marketing wants to ship a campaign, they shouldn't need an engineer. The system needs to give them a finite set of pre-tested, pre-styled blocks that they can stack however they want — and have it render correctly in:
+
+- Gmail (web + iOS + Android)
+- Outlook (every version, especially the 2013 desktop one that hates you)
+- Apple Mail (light + dark mode)
+- Yahoo, Proton, the rest
+
+That last one is where most systems fall apart. A button that looks good in Gmail and broken in Outlook is a dead button.
+
+<Aside>
+The trick that took me years to internalize: **stop trying to make it look the same in every client.** Make it look *acceptable* in every client and *great* in the ones that matter for your audience.
+</Aside>
+
+## Session cookies in email
+
+At AKQA we built dynamic, session-cookie-based templates powering multi-campaign workflows. This is the kind of work that gets shrugged at on resumes because nobody knows what it means.
+
+Here's what it means concretely: imagine a user adds a product to their cart, abandons it, and then four hours later opens a transactional email about something completely unrelated. The transactional email *knows* about the abandoned cart — it can show a sidebar reminder, a personalized discount, or just nothing, depending on conversion-funnel rules.
+
+The hard part isn't reading the cookie. The hard part is:
+
+1. Architecting the template so the personalization block is optional, performant, and degrades gracefully when the cookie is missing.
+2. Building the marketing-side authoring tool so a non-engineer can drag in a personalization block without writing code.
+3. Making sure the dev experience for the engineers maintaining this is *not* a tire fire.
+
+## The metric you can claim on a resume
+
+When I led this work at Amperity, our email turnaround dropped by ~50% — from days to half a day, because marketing didn't need to file a ticket. They opened the template editor, picked a block, plugged in copy, hit preview, and shipped.
+
+That's the kind of cross-functional win that sells you to a hiring manager who's tired of engineering being a bottleneck.
+
+## If you want to skill up
+
+A few things to start with:
+
+- Read the [Litmus testing matrix](https://litmus.com/) for every client your audience uses
+- Build a hello-world template that renders identically (or acceptably) in Gmail and Outlook 2013 — this is the whole game
+- Learn the difference between MJML and hand-rolled HTML emails (MJML is great until it isn't)
+
+And then, the most important step: **put it on your portfolio.** A live inbox demo with Gmail/Outlook/dark tabs will get you more interest from hiring managers than any other piece you can ship. I'd bet money on it.

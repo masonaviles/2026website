@@ -1,0 +1,55 @@
+---
+title: "Building with Claude Code: notes from twelve years in, six months deep"
+description: "Notes from rebuilding my portfolio with an AI co-author. The patterns that worked, the ones I dropped, and what 'show your seams' looks like in production."
+date: "2026-05-09"
+tags: ["ai", "react", "process"]
+---
+
+The first thing nobody tells you about working with Claude Code is that the tool isn't the bottleneck — *you* are. Specifically, your willingness to write the brief.
+
+Twelve years in, I've shipped enough React to be skeptical of new "developer productivity" tools. Most of them sell you autocompleted boilerplate dressed up as judgment. Claude Code is the first one that actually changes the shape of what I build — not because it writes faster, but because it forces me to think in artifacts.
+
+<Aside title="The shift">
+I used to write code by typing. Now I write code by writing about the code I want, and editing the diff that comes back.
+</Aside>
+
+## CLAUDE.md is your real codebase
+
+The most underrated file in any Claude Code project isn't `package.json` — it's `CLAUDE.md`. It's the brief, the conventions, the working agreements, and the build order, all in one place. Every session reads it first.
+
+For this site, my `CLAUDE.md` says things like:
+
+```markdown
+- **Never code ahead of the brief.** If the user asks to brainstorm
+  or plan, no implementation.
+- **Show construction.** Leave artifacts (prompts, diffs, ADRs)
+  visible — they become content for the site itself.
+- **A11y is not a phase.** It's a gate on every component PR.
+```
+
+Those four bullets save me an hour per session. The model doesn't drift into building things I didn't ask for, doesn't bury implementation choices, and doesn't ship a single interactive widget without a focus ring. The cost of writing them once is paid back twenty times.
+
+## Treat diffs as contracts
+
+Here's the workflow I've landed on after six months:
+
+1. Brainstorm in plain English. **No code.** If you ask for code and the model gives you something not-quite-right, you've spent your reviewing budget on the wrong thing.
+2. Once you and the model agree on shape, ask for a plan. The plan is a contract.
+3. Implement against the plan in small phases (mine are sized so one session = one phase end-to-end).
+4. Every phase ends with a verify checklist. Don't move on until it passes *in a browser*, not just `tsc`.
+
+The "verify in a browser" rule is the most violated. Type checks aren't proof a feature works. I keep getting bitten by Claude marking work as done because the build compiled. Now I make it run the dev server and curl the route.
+
+## Show the seams
+
+The thing I'm most excited about for this site is the part you won't see until later: every section will have a `view the prompt that built this` button. The same way GitHub lets you click "blame" and see who wrote a line of code, you'll be able to click and see the brief that shaped a feature.
+
+This isn't a gimmick — it's a recruiting move. In 2026, fluency with AI-augmented workflows is a hireable skill. I'd rather show how I think about it than write "AI-native" on a resume bullet and hope someone asks.
+
+<Achievement id="whisperer" />
+
+## What I still write by hand
+
+Most of the typography. Most of the motion. The accent palette for each career chapter. Anything where taste matters more than speed — Claude is a better second pair of eyes than first.
+
+The model is happy to give you generic. Your job is to give it taste.

@@ -1,0 +1,81 @@
+---
+title: "React perf I actually use"
+description: "Twelve years of React, and here's the short list of perf patterns that earn their keep on real codebases. Skip the YouTube greatest-hits."
+date: "2026-03-15"
+tags: ["react", "perf"]
+---
+
+There's a whole genre of YouTube videos titled "10 React Performance Tricks!!" and most of them are wrong. Not technically wrong — just wrong for the codebase you're actually working in. `React.memo` everywhere is not the answer.
+
+Here's the short list of perf patterns I actually use in production. Measured wins only.
+
+## 1. Measure before you memo
+
+If `React.memo` doesn't save renders, it costs you in shallow-equal checks and cognitive overhead. So before adding it, *measure*.
+
+```tsx
+import { Profiler } from 'react';
+
+<Profiler
+  id="ProductGrid"
+  onRender={(id, phase, actualDuration) => {
+    if (actualDuration > 16) {
+      console.warn(`${id} ${phase}: ${actualDuration.toFixed(1)}ms`);
+    }
+  }}
+>
+  <ProductGrid />
+</Profiler>
+```
+
+That's it. Drop a `<Profiler>` around the suspected subtree, interact, watch the console. If a subtree never crosses 16ms (one frame), `React.memo` isn't going to make it faster.
+
+## 2. Virtualize the second the list gets serious
+
+The day a list grows past ~50 items in production, virtualize it. `@tanstack/react-virtual` is the right pick in 2026. The default settings are fine. Don't tune until you see a problem.
+
+At Smartsheet I owned a Drupal frontend serving millions of monthly users, and the biggest perf wins came from realizing that "lists" were everywhere — comment threads, attachment lists, user pickers, even some grid rows. Virtualizing the top three biggest ones bought back hundreds of milliseconds.
+
+## 3. Split routes, not components
+
+`React.lazy` for a component is usually premature. `React.lazy` for a whole route is almost always correct. The route boundary is where users wait anyway — that's the right place to split your bundle.
+
+```tsx
+const Playground = lazy(() => import('./playground'));
+```
+
+Modern Next.js does this for you automatically per route. Use it. Don't override it with manual splits unless you measured.
+
+## 4. The hidden cost of context
+
+Context is great until it's the wrong tool. The trap: if your context value re-creates every render, *every consumer* re-renders.
+
+```tsx
+// Bad — new object every render
+<ThemeContext.Provider value={{ theme, setTheme }}>
+
+// Better
+const value = useMemo(() => ({ theme, setTheme }), [theme]);
+<ThemeContext.Provider value={value}>
+```
+
+Even better: split your contexts. A `ThemeContext` and a `ThemeSetterContext`. Components that only need to read theme don't subscribe to setter changes.
+
+## 5. Hydration costs are real
+
+Server Components in Next.js 16 changed the math. The cheapest component is the one that *never ships JavaScript at all*. Default to Server Components; opt into client-only with `"use client"` where you actually need state or events.
+
+The mason.os site you're reading this on has a five-line client component for the theme toggle, a small client island for the rail's active state, and the whole rest of the hero is server-rendered. That's why it's fast.
+
+## What I don't use
+
+- `useCallback` everywhere. It costs more than it saves unless you're passing the callback to a memoized child.
+- `useMemo` for primitives. Returning a string is fast.
+- "Optimization libraries." Most are solutions in search of a problem.
+- Premature `Suspense` boundaries. Suspense is great when you have actual async work; wrapping a fast component buys nothing.
+
+## The real win
+
+The biggest perf win on every codebase I've worked on came from one source: deleting code that didn't need to be there. Smaller bundles. Fewer renders. Simpler reasoning.
+
+If you're optimizing and your bundle isn't getting smaller, you're probably not optimizing.

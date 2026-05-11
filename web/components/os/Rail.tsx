@@ -15,7 +15,7 @@ const WORKSPACE: WorkspaceItem[] = [
   { label: "~/profile", href: "/", badge: { text: "main", tone: "accent" } },
   { label: "~/work", href: "/work" },
   { label: "~/projects", href: "/projects" },
-  { label: "~/blog", href: "/blog", badge: { text: "soon", tone: "accent-2" } },
+  { label: "~/blog", href: "/blog", badge: { text: "3", tone: "accent-2" } },
   { label: "~/system", href: "/system" },
   { label: "~/playground", href: "/playground" },
   { label: "~/contact", href: "/contact" },

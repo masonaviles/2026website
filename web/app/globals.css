@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* ---------- Theme tokens ---------- */
 :root {
@@ -191,4 +192,56 @@ body::before {
 .scrollbar-themed::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-hover);
   background-clip: content-box;
+}
+
+/* ---------- Prose (blog post styling) ---------- */
+.prose-mason {
+  --tw-prose-body: var(--ink-soft);
+  --tw-prose-headings: var(--ink);
+  --tw-prose-lead: var(--ink-soft);
+  --tw-prose-links: var(--accent);
+  --tw-prose-bold: var(--ink);
+  --tw-prose-counters: var(--ink-mute);
+  --tw-prose-bullets: var(--ink-mute);
+  --tw-prose-hr: var(--stroke);
+  --tw-prose-quotes: var(--ink-soft);
+  --tw-prose-quote-borders: var(--accent);
+  --tw-prose-captions: var(--ink-mute);
+  --tw-prose-kbd: var(--ink-soft);
+  --tw-prose-kbd-shadows: 0 0 0 1px var(--stroke);
+  --tw-prose-code: var(--accent-2);
+  --tw-prose-pre-code: var(--ink);
+  --tw-prose-pre-bg: var(--term-bg);
+  --tw-prose-th-borders: var(--stroke);
+  --tw-prose-td-borders: var(--stroke-soft);
+}
+
+.prose-mason :where(pre):not(:where([class~="not-prose"] *)) {
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+}
+
+.prose-mason :where(code):not(:where([class~="not-prose"] *)) {
+  font-weight: 500;
+  font-size: 0.9em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent-2) 10%, transparent);
+}
+
+.prose-mason :where(code):not(:where([class~="not-prose"] *))::before,
+.prose-mason :where(code):not(:where([class~="not-prose"] *))::after {
+  content: "";
+}
+
+/* rehype-pretty-code line numbers and highlights, if used later */
+.prose-mason figure[data-rehype-pretty-code-figure] pre {
+  padding: 14px 16px;
+}
+
+.prose-mason figure[data-rehype-pretty-code-figure] code {
+  background: transparent;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.65;
 }
