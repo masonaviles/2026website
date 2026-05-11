@@ -16,6 +16,7 @@ from app.services.anthropic_client import (
     get_client,
     usage_to_dict,
 )
+from app.services.turnstile import require_turnstile
 
 router = APIRouter(prefix="/api/ai", tags=["ai"])
 logger = logging.getLogger("mason.ai.chat")
@@ -47,13 +48,14 @@ async def _stream_chat(payload: ChatIn) -> AsyncIterator[bytes]:
 
 
 @router.post("/chat")
-@limiter.limit("10/hour")
+@limiter.limit("30/day;10/hour")
 async def chat(request: Request, payload: ChatIn) -> StreamingResponse:
     if not settings.anthropic_api_key:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="ai chat is not configured (ANTHROPIC_API_KEY missing)",
         )
+    await require_turnstile(request, payload.turnstile_token)
     return StreamingResponse(
         _stream_chat(payload),
         media_type="text/event-stream",

@@ -16,6 +16,7 @@ from app.services.anthropic_client import (
     get_client,
     usage_to_dict,
 )
+from app.services.turnstile import require_turnstile
 
 router = APIRouter(prefix="/api/ai", tags=["ai"])
 logger = logging.getLogger("mason.ai.letter")
@@ -66,7 +67,7 @@ async def _stream_letter(payload: CoverLetterIn) -> AsyncIterator[bytes]:
 
 
 @router.post("/cover-letter")
-@limiter.limit("3/hour")
+@limiter.limit("10/day;3/hour")
 async def cover_letter(
     request: Request, payload: CoverLetterIn
 ) -> StreamingResponse:
@@ -75,6 +76,7 @@ async def cover_letter(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="ai cover-letter is not configured (ANTHROPIC_API_KEY missing)",
         )
+    await require_turnstile(request, payload.turnstile_token)
     return StreamingResponse(
         _stream_letter(payload),
         media_type="text/event-stream",

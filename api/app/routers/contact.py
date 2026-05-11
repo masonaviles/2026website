@@ -7,6 +7,7 @@ from app.core.rate_limit import limiter
 from app.db.engine import get_session
 from app.db.models.contact import Contact
 from app.schemas.contact import ContactIn, ContactOut
+from app.services.turnstile import require_turnstile
 
 router = APIRouter(prefix="/api", tags=["contact"])
 
@@ -20,6 +21,7 @@ async def submit_contact(
     payload: ContactIn,
     session: SessionDep,
 ) -> ContactOut:
+    await require_turnstile(request, payload.turnstile_token)
     contact = Contact(
         name=payload.name.strip(),
         email=payload.email,

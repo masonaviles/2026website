@@ -4,6 +4,11 @@ import { useRef, useState } from "react";
 import { ArrowUp, RotateCcw, Sparkles } from "lucide-react";
 import { streamSse, type SseDone } from "@/lib/sse";
 import { emit } from "@/lib/achievements/events";
+import {
+  TurnstileGate,
+  type TurnstileGateHandle,
+  turnstileEnabled,
+} from "@/components/turnstile/TurnstileGate";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -20,12 +25,17 @@ export function AskChat() {
   const [streaming, setStreaming] = useState(false);
   const [usage, setUsage] = useState<SseDone["usage"] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [tsToken, setTsToken] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const tsRef = useRef<TurnstileGateHandle>(null);
+
+  const gated = turnstileEnabled();
+  const ready = !gated || tsToken !== null;
 
   async function ask(text: string) {
     const content = text.trim();
-    if (!content || streaming) return;
+    if (!content || streaming || !ready) return;
 
     const next: Msg[] = [...messages, { role: "user", content }];
     setMessages([...next, { role: "assistant", content: "" }]);
@@ -35,12 +45,16 @@ export function AskChat() {
     setStreaming(true);
     emit({ type: "chat:message:sent" });
 
+    const tokenForRequest = tsToken;
     abortRef.current = new AbortController();
     try {
       let assistant = "";
       for await (const event of streamSse(
         "/api/ai/chat",
-        { messages: next.map((m) => ({ role: m.role, content: m.content })) },
+        {
+          messages: next.map((m) => ({ role: m.role, content: m.content })),
+          turnstile_token: tokenForRequest,
+        },
         { signal: abortRef.current.signal },
       )) {
         if (event.type === "delta") {
@@ -63,6 +77,8 @@ export function AskChat() {
     } finally {
       setStreaming(false);
       abortRef.current = null;
+      // Tokens are single-use — request a fresh one for the next message.
+      tsRef.current?.reset();
       inputRef.current?.focus();
     }
   }
@@ -87,7 +103,7 @@ export function AskChat() {
         aria-live="polite"
       >
         {messages.length === 0 ? (
-          <EmptyState onPick={(s) => ask(s)} />
+          <EmptyState onPick={(s) => ask(s)} ready={ready} />
         ) : (
           messages.map((m, i) => <Bubble key={i} role={m.role} content={m.content} />)
         )}
@@ -127,18 +143,31 @@ export function AskChat() {
           />
           <button
             type="submit"
-            disabled={!draft.trim() || streaming}
+            disabled={!draft.trim() || streaming || !ready}
             className="absolute bottom-3 right-3 grid h-8 w-8 place-items-center rounded-lg bg-accent text-[var(--btn-primary-ink)] transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Send"
-            title="Send (enter)"
+            title={!ready ? "verifying you're human…" : "Send (enter)"}
           >
             <ArrowUp size={14} aria-hidden="true" />
           </button>
         </div>
+
+        <TurnstileGate ref={tsRef} onToken={setTsToken} />
+
         <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] text-ink-mute">
           <span>
-            <kbd className="rounded border border-stroke bg-panel-2 px-1.5 py-px">enter</kbd>{" "}
-            send · <kbd className="rounded border border-stroke bg-panel-2 px-1.5 py-px">shift+enter</kbd> newline
+            {gated && !ready ? (
+              <span className="text-warn">verifying you&apos;re human…</span>
+            ) : (
+              <>
+                <kbd className="rounded border border-stroke bg-panel-2 px-1.5 py-px">enter</kbd>{" "}
+                send ·{" "}
+                <kbd className="rounded border border-stroke bg-panel-2 px-1.5 py-px">
+                  shift+enter
+                </kbd>{" "}
+                newline
+              </>
+            )}
           </span>
           {messages.length > 0 && (
             <button
@@ -158,7 +187,13 @@ export function AskChat() {
   );
 }
 
-function EmptyState({ onPick }: { onPick: (s: string) => void }) {
+function EmptyState({
+  onPick,
+  ready,
+}: {
+  onPick: (s: string) => void;
+  ready: boolean;
+}) {
   return (
     <div className="flex flex-col gap-3 py-8 text-center">
       <Sparkles size={20} className="mx-auto text-accent" aria-hidden="true" />
@@ -171,7 +206,8 @@ function EmptyState({ onPick }: { onPick: (s: string) => void }) {
             key={s}
             type="button"
             onClick={() => onPick(s)}
-            className="rounded-md border border-stroke bg-bg-2 px-2.5 py-1 font-mono text-[11px] text-ink-soft transition-colors hover:border-accent hover:text-accent"
+            disabled={!ready}
+            className="rounded-md border border-stroke bg-bg-2 px-2.5 py-1 font-mono text-[11px] text-ink-soft transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
             {s}
           </button>

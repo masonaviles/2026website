@@ -3,6 +3,11 @@
 import { useRef, useState } from "react";
 import { Copy, FileText, RotateCcw } from "lucide-react";
 import { streamSse, type SseDone } from "@/lib/sse";
+import {
+  TurnstileGate,
+  type TurnstileGateHandle,
+  turnstileEnabled,
+} from "@/components/turnstile/TurnstileGate";
 
 export function CoverLetterDemo() {
   const [jd, setJd] = useState("");
@@ -13,16 +18,22 @@ export function CoverLetterDemo() {
   const [usage, setUsage] = useState<SseDone["usage"] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [tsToken, setTsToken] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const tsRef = useRef<TurnstileGateHandle>(null);
+
+  const gated = turnstileEnabled();
+  const ready = !gated || tsToken !== null;
 
   async function generate() {
-    if (!jd.trim() || streaming) return;
+    if (!jd.trim() || streaming || !ready) return;
     setOutput("");
     setError(null);
     setUsage(null);
     setStreaming(true);
     abortRef.current = new AbortController();
 
+    const tokenForRequest = tsToken;
     try {
       let acc = "";
       for await (const event of streamSse(
@@ -31,6 +42,7 @@ export function CoverLetterDemo() {
           job_description: jd.trim(),
           company_name: company.trim() || null,
           role_title: role.trim() || null,
+          turnstile_token: tokenForRequest,
         },
         { signal: abortRef.current.signal },
       )) {
@@ -50,6 +62,7 @@ export function CoverLetterDemo() {
     } finally {
       setStreaming(false);
       abortRef.current = null;
+      tsRef.current?.reset();
     }
   }
 
@@ -101,7 +114,8 @@ export function CoverLetterDemo() {
           <button
             type="button"
             onClick={generate}
-            disabled={!jd.trim() || streaming}
+            disabled={!jd.trim() || streaming || !ready}
+            title={!ready ? "verifying you're human…" : undefined}
             className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 font-mono text-[13px] font-medium transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
             style={{
               color: "var(--btn-primary-ink)",
@@ -109,7 +123,11 @@ export function CoverLetterDemo() {
             }}
           >
             <FileText size={14} aria-hidden="true" />
-            {streaming ? "writing…" : "generate cover letter"}
+            {streaming
+              ? "writing…"
+              : !ready
+                ? "verifying…"
+                : "generate cover letter"}
           </button>
           {(output || streaming) && (
             <button
@@ -121,6 +139,7 @@ export function CoverLetterDemo() {
             </button>
           )}
         </div>
+        <TurnstileGate ref={tsRef} onToken={setTsToken} />
       </div>
 
       {/* Right: output */}
