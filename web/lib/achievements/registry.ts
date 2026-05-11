@@ -9,6 +9,8 @@ export const ACHIEVEMENT_IDS = [
   "whisperer",
   "recruiter",
   "egg_hunter",
+  "bug_hunter",
+  "terminator",
   "completionist",
 ] as const;
 
@@ -93,6 +95,20 @@ export const ACHIEVEMENTS: Record<AchievementId, AchievementDef> = {
     label: "Egg hunter",
     description: "Found a hidden command.",
     mark: "🥚",
+    wired: true,
+  },
+  bug_hunter: {
+    id: "bug_hunter",
+    label: "Bug hunter",
+    description: "Solved your first Bug Hunt puzzle.",
+    mark: "🐛",
+    wired: true,
+  },
+  terminator: {
+    id: "terminator",
+    label: "Terminator",
+    description: "Solved every Bug Hunt puzzle.",
+    mark: "🏆",
     wired: true,
   },
   completionist: {

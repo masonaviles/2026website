@@ -71,6 +71,8 @@ describe("achievement store", () => {
       "whisperer",
       "recruiter",
       "egg_hunter",
+      "bug_hunter",
+      "terminator",
     ] as const;
     for (const id of others) unlock(id);
     expect(getSnapshot().unlocked.completionist).toBeDefined();

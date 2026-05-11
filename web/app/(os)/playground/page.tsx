@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { ArrowUpRight, FileText, MessageSquare } from "lucide-react";
+import { ArrowUpRight, Bug, FileText, MessageSquare } from "lucide-react";
 
 export const metadata = {
   title: "~/playground · mason.os",
   description:
-    "Live AI demos backed by FastAPI streaming Claude. Ask about Mason, or generate a tailored cover letter from a job description.",
+    "Live AI demos backed by FastAPI streaming Claude, plus a React Bug Hunt mini-game.",
 };
 
 const DEMOS = [
@@ -13,7 +13,7 @@ const DEMOS = [
     title: "Ask about Mason",
     description:
       "Streaming chat grounded on the resume. Ask 'would Mason fit a Shopify-heavy role?' and get a real answer.",
-    model: "claude-sonnet-4-6",
+    badges: ["claude-sonnet-4-6", "SSE", "cached prefix"],
     icon: MessageSquare,
   },
   {
@@ -21,8 +21,16 @@ const DEMOS = [
     title: "Cover letter generator",
     description:
       "Paste a job description. Get a tailored cover letter streamed in Mason's voice — body only, drop into your own template.",
-    model: "claude-opus-4-7",
+    badges: ["claude-opus-4-7", "SSE", "cached prefix"],
     icon: FileText,
+  },
+  {
+    href: "/playground/bug-hunt",
+    title: "Bug Hunt",
+    description:
+      "Three broken React components, each missing one hook. Drag the right one into the slot — the live preview fixes itself.",
+    badges: ["interactive", "drag & drop", "2 achievements"],
+    icon: Bug,
   },
 ];
 
@@ -31,20 +39,19 @@ export default function PlaygroundIndex() {
     <section className="flex flex-col gap-6 pb-8">
       <header>
         <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-mute">
-          ~/playground — 2 live demos
+          ~/playground — {DEMOS.length} demos
         </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight">
-          Real Claude, real streaming.
+          Real Claude, real React.
         </h1>
         <p className="mt-2 max-w-[60ch] text-sm leading-relaxed text-ink-soft">
-          Both demos hit the Anthropic API through a FastAPI proxy with prompt
-          caching. The cached prefix is a curated knowledge file built from the
-          résumé — second-and-onward requests show cache-read tokens. Rate
-          limited per IP.
+          Two demos hit the Anthropic API through a FastAPI proxy with prompt
+          caching. One mini-game fixes broken React components live. All three
+          are real working code — no hand-waving.
         </p>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {DEMOS.map((d) => {
           const Icon = d.icon;
           return (
@@ -70,12 +77,15 @@ export default function PlaygroundIndex() {
                 {d.title}
               </h2>
               <p className="text-sm leading-relaxed text-ink-soft">{d.description}</p>
-              <div className="mt-auto flex items-center gap-2 font-mono text-[10px] text-ink-mute">
-                <span className="rounded-md border border-stroke px-1.5 py-px">
-                  model · {d.model}
-                </span>
-                <span className="rounded-md border border-stroke px-1.5 py-px">SSE</span>
-                <span className="rounded-md border border-stroke px-1.5 py-px">cached prefix</span>
+              <div className="mt-auto flex flex-wrap items-center gap-1.5 font-mono text-[10px] text-ink-mute">
+                {d.badges.map((b) => (
+                  <span
+                    key={b}
+                    className="rounded-md border border-stroke px-1.5 py-px"
+                  >
+                    {b}
+                  </span>
+                ))}
               </div>
             </Link>
           );

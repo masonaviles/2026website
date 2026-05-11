@@ -12,7 +12,9 @@ export type AchievementEvent =
   | { type: "cta:resume" }
   | { type: "cta:contact" }
   | { type: "easter:konami" }
-  | { type: "easter:cmd"; cmd: string };
+  | { type: "easter:cmd"; cmd: string }
+  | { type: "bug-hunt:solved"; puzzleId: string }
+  | { type: "bug-hunt:all-solved" };
 
 /**
  * Single emit() entry point. Maps every event to its store action.
@@ -52,6 +54,12 @@ export function emit(event: AchievementEvent): void {
     case "easter:konami":
     case "easter:cmd":
       unlock("egg_hunter");
+      return;
+    case "bug-hunt:solved":
+      unlock("bug_hunter");
+      return;
+    case "bug-hunt:all-solved":
+      unlock("terminator");
       return;
   }
 }
