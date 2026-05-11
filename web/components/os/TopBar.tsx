@@ -1,9 +1,9 @@
-import { Settings } from "lucide-react";
 import { TrafficLights } from "./TrafficLights";
 import { ThemeToggle } from "./ThemeToggle";
 import { InspectorButton } from "./InspectorButton";
 import { HamburgerButton } from "./HamburgerButton";
 import { SearchButton } from "./SearchButton";
+import { HelpButton } from "./HelpButton";
 
 export function TopBar() {
   return (
@@ -23,31 +23,8 @@ export function TopBar() {
         <ThemeToggle />
         <SearchButton />
         <InspectorButton />
-        <span className="hidden sm:flex">
-          <TopBarIcon label="Settings">
-            <Settings size={14} aria-hidden="true" />
-          </TopBarIcon>
-        </span>
+        <HelpButton />
       </div>
     </header>
-  );
-}
-
-function TopBarIcon({
-  children,
-  label,
-}: {
-  children: React.ReactNode;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      title={label}
-      aria-label={label}
-      className="inline-grid h-[22px] w-[26px] place-items-center rounded-md text-ink-mute transition-colors hover:bg-panel-2 hover:text-ink"
-    >
-      {children}
-    </button>
   );
 }

@@ -3,6 +3,7 @@ import { Tabs } from "@/components/os/Tabs";
 import { Rail } from "@/components/os/Rail";
 import { StatusBar } from "@/components/os/StatusBar";
 import { CommandPalette } from "@/components/os/CommandPalette";
+import { HelpCheatsheet } from "@/components/os/HelpCheatsheet";
 import { AppHooks } from "@/components/achievements/AppHooks";
 import { ToastQueue } from "@/components/achievements/ToastQueue";
 import { getAllPosts } from "@/lib/blog";
@@ -44,6 +45,7 @@ export default async function OsLayout({
       </div>
       <AppHooks />
       <CommandPalette posts={paletteBlogLinks} />
+      <HelpCheatsheet />
       <ToastQueue />
     </>
   );
