@@ -47,23 +47,33 @@ const MAX_RAIL_ROWS = 3;
 export function Rail() {
   const pathname = usePathname() ?? "/";
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [showAllAchievements, setShowAllAchievements] = useState(false);
   const achievementState = useAchievements();
 
-  // Build a deterministic list: latest unlocked first, then fill with the
-  // next wired-but-locked rows so the panel always shows ~3 entries.
+  // Latest unlocked first, then fill (or fully expand) with locked rows.
   const unlocked = Object.entries(achievementState.unlocked)
     .filter(([id]) => (ACHIEVEMENT_IDS as readonly string[]).includes(id))
     .map(([id, info]) => ({ id: id as AchievementId, at: info?.at ?? "" }))
     .sort((a, b) => b.at.localeCompare(a.at));
-  const lockedWired = ACHIEVEMENT_IDS.filter(
-    (id) => ACHIEVEMENTS[id].wired && !achievementState.unlocked[id],
+  const lockedAll = ACHIEVEMENT_IDS.filter(
+    (id) => !achievementState.unlocked[id],
   );
-  const railRows: { id: AchievementId; unlocked: boolean }[] = [
-    ...unlocked.slice(0, MAX_RAIL_ROWS).map((u) => ({ id: u.id, unlocked: true })),
-    ...lockedWired
-      .slice(0, Math.max(0, MAX_RAIL_ROWS - unlocked.length))
-      .map((id) => ({ id, unlocked: false })),
-  ];
+  const lockedWired = lockedAll.filter((id) => ACHIEVEMENTS[id].wired);
+
+  const railRows: { id: AchievementId; unlocked: boolean }[] =
+    showAllAchievements
+      ? [
+          ...unlocked.map((u) => ({ id: u.id, unlocked: true })),
+          ...lockedAll.map((id) => ({ id, unlocked: false })),
+        ]
+      : [
+          ...unlocked
+            .slice(0, MAX_RAIL_ROWS)
+            .map((u) => ({ id: u.id, unlocked: true })),
+          ...lockedWired
+            .slice(0, Math.max(0, MAX_RAIL_ROWS - unlocked.length))
+            .map((id) => ({ id, unlocked: false })),
+        ];
   const unlockedCount = unlocked.length;
   const totalCount = ACHIEVEMENT_IDS.length;
 
@@ -174,6 +184,18 @@ export function Rail() {
             />
           ))}
         </ul>
+        <button
+          type="button"
+          onClick={() => setShowAllAchievements((v) => !v)}
+          aria-expanded={showAllAchievements}
+          className="mt-1 ml-2.5 inline-flex items-center gap-1.5 rounded-md px-1 py-0.5 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute transition-colors hover:text-accent"
+        >
+          {showAllAchievements ? (
+            <>show less ▴</>
+          ) : (
+            <>show all · {totalCount} ▾</>
+          )}
+        </button>
       </div>
     </div>
   );
