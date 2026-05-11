@@ -1,14 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { emit } from "@/lib/achievements/events";
 
 /**
  * Wraps a blog post and emits the `speed_reader` achievement event when:
  *   - the reader has scrolled past 90% of the article, AND
  *   - they've spent at least 70% of the estimated reading time on page.
- *
- * Phase 5 hooks this into the achievement bus. For now we just log so we
- * can verify the condition fires correctly in dev.
  */
 export function Reader({
   slug,
@@ -41,13 +39,7 @@ export function Reader({
       const dwellMs = Date.now() - startRef.current;
       if (pct > 90 && dwellMs > minMs) {
         firedRef.current = true;
-        // Phase 5 will replace this with achievement bus emit().
-        console.info("[achievement] speed_reader", {
-          slug,
-          pct: Math.round(pct),
-          dwellSec: Math.round(dwellMs / 1000),
-          requiredSec: Math.round(minMs / 1000),
-        });
+        emit({ type: "blog:read:complete", slug });
       }
     }
 

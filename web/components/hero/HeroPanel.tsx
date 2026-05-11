@@ -1,8 +1,8 @@
 import clsx from "clsx";
 import { profile } from "@/lib/profile";
+import { AchievementsPanel } from "@/components/achievements/AchievementsPanel";
 import { Tagline } from "./Tagline";
 import { JsonBio } from "./JsonBio";
-import { AchievementsCard } from "./AchievementsCard";
 import { IconLinks } from "./IconLinks";
 import { HeroCtas } from "./HeroCtas";
 
@@ -55,7 +55,9 @@ export function HeroPanel() {
       {/* Right column */}
       <div>
         <JsonBio />
-        <AchievementsCard />
+        <div className="mt-3.5">
+          <AchievementsPanel allowReset />
+        </div>
       </div>
     </section>
   );

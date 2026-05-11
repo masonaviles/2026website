@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { ArrowUp, RotateCcw, Sparkles } from "lucide-react";
 import { streamSse, type SseDone } from "@/lib/sse";
+import { emit } from "@/lib/achievements/events";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -32,6 +33,7 @@ export function AskChat() {
     setError(null);
     setUsage(null);
     setStreaming(true);
+    emit({ type: "chat:message:sent" });
 
     abortRef.current = new AbortController();
     try {

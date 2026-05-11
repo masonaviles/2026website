@@ -6,7 +6,7 @@ import { Chips } from "@/components/design-system/Chips";
 import { Motion } from "@/components/design-system/Motion";
 import { Tagline } from "@/components/hero/Tagline";
 import { JsonBio } from "@/components/hero/JsonBio";
-import { AchievementsCard } from "@/components/hero/AchievementsCard";
+import { AchievementsPanel } from "@/components/achievements/AchievementsPanel";
 import { IconLinks } from "@/components/hero/IconLinks";
 
 export const metadata = {
@@ -101,7 +101,7 @@ export default function SystemPage() {
         description="The gamification preview from the hero — live cell grid + progress. Wired in Phase 5."
       >
         <div className="max-w-[420px]">
-          <AchievementsCard />
+          <AchievementsPanel />
         </div>
       </Section>
     </article>

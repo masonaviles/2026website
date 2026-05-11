@@ -3,8 +3,21 @@ import { Tabs } from "@/components/os/Tabs";
 import { Rail } from "@/components/os/Rail";
 import { StatusBar } from "@/components/os/StatusBar";
 import { CommandPalette } from "@/components/os/CommandPalette";
+import { AppHooks } from "@/components/achievements/AppHooks";
+import { ToastQueue } from "@/components/achievements/ToastQueue";
+import { getAllPosts } from "@/lib/blog";
 
-export default function OsLayout({ children }: { children: React.ReactNode }) {
+export default async function OsLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const posts = await getAllPosts();
+  const paletteBlogLinks = posts.map((p) => ({
+    slug: p.slug,
+    title: p.meta.title,
+  }));
+
   return (
     <>
       <div
@@ -27,7 +40,9 @@ export default function OsLayout({ children }: { children: React.ReactNode }) {
         </div>
         <StatusBar />
       </div>
-      <CommandPalette />
+      <AppHooks />
+      <CommandPalette posts={paletteBlogLinks} />
+      <ToastQueue />
     </>
   );
 }

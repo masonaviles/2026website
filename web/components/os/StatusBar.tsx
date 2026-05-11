@@ -1,3 +1,5 @@
+import { StatusBarProgress } from "@/components/achievements/StatusBarProgress";
+
 export function StatusBar() {
   return (
     <footer
@@ -18,9 +20,7 @@ export function StatusBar() {
         ⚡ Lighthouse target ≥ 98
       </span>
       <Sep />
-      <span className="inline-flex items-center gap-1.5">↑ phase 1 in flight</span>
-      <Sep />
-      <span className="inline-flex items-center gap-1.5 text-warn">★ 1/11 achievements</span>
+      <StatusBarProgress />
       <span className="flex-1" />
       <span className="inline-flex items-center gap-1.5">FastAPI · fly · ok</span>
       <Sep />

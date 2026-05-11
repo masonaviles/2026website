@@ -1,6 +1,7 @@
-import { Search, LayoutGrid, Settings } from "lucide-react";
+import { Search, Settings } from "lucide-react";
 import { TrafficLights } from "./TrafficLights";
 import { ThemeToggle } from "./ThemeToggle";
+import { InspectorButton } from "./InspectorButton";
 
 export function TopBar() {
   return (
@@ -18,9 +19,7 @@ export function TopBar() {
         <TopBarIcon label="Search">
           <Search size={14} aria-hidden="true" />
         </TopBarIcon>
-        <TopBarIcon label="Inspector">
-          <LayoutGrid size={14} aria-hidden="true" />
-        </TopBarIcon>
+        <InspectorButton />
         <TopBarIcon label="Settings">
           <Settings size={14} aria-hidden="true" />
         </TopBarIcon>

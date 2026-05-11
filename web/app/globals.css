@@ -194,6 +194,20 @@ body::before {
   background-clip: content-box;
 }
 
+/* ---------- Easter-egg flair ---------- */
+.god-mode {
+  filter: hue-rotate(180deg) saturate(1.4);
+  transition: filter 1.2s ease;
+}
+
+.alt-theme-konami body {
+  background-image:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 6%, transparent), transparent 40%),
+    radial-gradient(900px 600px at 0% -10%, var(--body-tint-1), transparent 60%),
+    radial-gradient(700px 500px at 100% 0%, var(--body-tint-2), transparent 55%);
+  background-color: var(--bg);
+}
+
 /* ---------- Prose (blog post styling) ---------- */
 .prose-mason {
   --tw-prose-body: var(--ink-soft);
