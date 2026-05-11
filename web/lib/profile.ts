@@ -19,6 +19,10 @@ export interface Profile {
   statusChip: string;
   /** Headline split into two lines. line2 is the brand statement. */
   headline: { line1: string; line2: string };
+  /** Small accent line directly under the headline. */
+  subhead: string;
+  /** Master skills inventory shown below the meta-grid. */
+  stack: { category: string; items: string[] }[];
   /** Tagline supports inline tokens: *mono-accent* and **bold-ink**. */
   tagline: string;
   meta: MetaRow[];
@@ -40,8 +44,9 @@ export const profile: Profile = {
   statusChip: "12+ year software engineer",
   headline: {
     line1: "Hi, I'm Mason.",
-    line2: "I build the web like it ships at Apple",
+    line2: "I build the web faster, cleaner, kinder.",
   },
+  subhead: "human-paired with Claude · twelve years of taste behind it",
   tagline:
     "Senior full-stack — *React*, *TypeScript*, *Next.js* up front and *Python* / *FastAPI* behind. " +
     "I've shipped at **Apple** via AKQA & Level Studios, **Smartsheet**, **Amperity**, and **Uptime.com**, " +
@@ -52,7 +57,34 @@ export const profile: Profile = {
     { key: "stack", value: "react · ts · py · ai" },
     { key: "location", value: "Remote · Las Vegas, NV" },
     { key: "a11y", value: "WCAG 2.2 AA · 508", ok: true },
-    { key: "status", value: "open to senior + staff", ok: true },
+    { key: "status", value: "open to software + web", ok: true },
+  ],
+  stack: [
+    {
+      category: "frontend",
+      items: [
+        "React",
+        "TypeScript",
+        "Next.js",
+        "Vue",
+        "Nuxt",
+        "Tailwind CSS",
+        "Chakra UI",
+        "Framer Motion",
+      ],
+    },
+    {
+      category: "backend",
+      items: ["Node.js", "Python", "FastAPI", "Supabase", "PHP"],
+    },
+    {
+      category: "ai",
+      items: ["Claude", "Gemini", "Codex", "ChatGPT", "MidJourney", "ComfyUI"],
+    },
+    {
+      category: "cms",
+      items: ["Shopify", "Drupal", "WordPress", "Webflow", "Craft CMS"],
+    },
   ],
   icons: [
     { key: "github", label: "GitHub", href: "https://github.com/masonaviles", external: true },

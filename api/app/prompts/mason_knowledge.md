@@ -16,9 +16,9 @@ This is the cached context block for both the chat assistant and the cover-lette
 ## Stack snapshot
 
 - **Front:** React, TypeScript, Next.js, Vue.js, Nuxt.js, Tailwind CSS, Chakra UI, Framer Motion
-- **Back:** Node.js, Python (Django, FastAPI), PHP, Liquid
-- **CMS/commerce:** Shopify (themes, Liquid, apps), WordPress, Craft CMS, Drupal, Astro
-- **AI:** Anthropic API (Claude), Claude Code, OpenAI Codex, Vertex AI; prompt engineering and AI-augmented workflows
+- **Back:** Node.js, Python (Django, FastAPI), PHP, Liquid, Supabase
+- **CMS/commerce:** Shopify (themes, Liquid, apps), Drupal, WordPress, Webflow, Craft CMS, Astro
+- **AI:** Claude (Anthropic API + Claude Code), Gemini (Google Vertex AI), OpenAI Codex / ChatGPT, MidJourney, ComfyUI; prompt engineering, AI-augmented workflows, image-gen pipelines
 - **Cloud:** Vercel, Netlify, Fly.io, Supabase, AWS, Google Cloud (Vertex AI)
 - **Practices:** frontend architecture, design systems, WCAG 2.1/2.2 + Section 508 accessibility, SEO, performance optimization, code review, team leadership, email engineering
 

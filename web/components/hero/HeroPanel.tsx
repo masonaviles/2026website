@@ -26,6 +26,9 @@ export function HeroPanel() {
           </span>
           <Cursor />
         </h1>
+        <p className="mb-4 font-mono text-[12.5px] text-accent">
+          {profile.subhead}
+        </p>
         <Tagline source={profile.tagline} />
 
         <div className="my-6 grid max-w-[580px] grid-cols-1 gap-2 min-[701px]:grid-cols-2">
@@ -40,6 +43,34 @@ export function HeroPanel() {
               </span>
             </div>
           ))}
+        </div>
+
+        <div className="mb-6">
+          <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-mute">
+            stack
+          </div>
+          <div className="flex flex-col gap-3">
+            {profile.stack.map((group) => (
+              <div
+                key={group.category}
+                className="flex flex-col gap-1.5 sm:flex-row sm:items-baseline sm:gap-3"
+              >
+                <span className="min-w-[80px] shrink-0 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-mute">
+                  {group.category}
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {group.items.map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-md border border-stroke bg-bg-2 px-2 py-0.5 font-mono text-[11px] text-ink-soft"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="mb-5">
