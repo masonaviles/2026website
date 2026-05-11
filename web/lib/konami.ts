@@ -45,6 +45,12 @@ export function attachKonami(onUnlock: () => void): () => void {
     const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
     const expected = SEQUENCE[pos];
 
+    // Verbose: log every key we receive so you can confirm the listener
+    // is alive and your browser is reporting the keys you'd expect.
+    console.log(
+      `${LOG_PREFIX} keydown · "${key}" · expecting "${expected}" (pos ${pos}/${SEQUENCE.length})`,
+    );
+
     if (key === expected) {
       pos += 1;
       console.info(
