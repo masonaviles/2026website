@@ -48,7 +48,7 @@ export const profile: Profile = {
     "and I write code with Claude as a co-author, not a tool.",
   meta: [
     { key: "role", value: "Senior FE Engineer Lead" },
-    { key: "currently", value: "@ AKQA · Apple account" },
+    { key: "currently", value: "shipping software" },
     { key: "stack", value: "react · ts · py · ai" },
     { key: "location", value: "Remote · Las Vegas, NV" },
     { key: "a11y", value: "WCAG 2.2 AA · 508", ok: true },
