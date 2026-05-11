@@ -70,13 +70,19 @@ export function HelpCheatsheet() {
             <KeyRow keys={["esc"]}>close any overlay</KeyRow>
           </Section>
 
-          <Section icon={Sparkles} title="Hidden things">
+          <Section icon={Sparkles} title="Konami code">
             <CmdRow cmd="↑ ↑ ↓ ↓ ← → ← → b a">
-              Konami code — alt theme + 🥚 achievement
+              press anywhere · alt theme + 🥚 achievement
             </CmdRow>
+          </Section>
+
+          <Section
+            icon={Sparkles}
+            title="Palette commands · open with ⌘K, then type"
+          >
             <CmdRow cmd="sudo hire mason">opens contact</CmdRow>
-            <CmdRow cmd="whoami">prints profile (palette only)</CmdRow>
-            <CmdRow cmd="iddqd">god mode flair (palette only)</CmdRow>
+            <CmdRow cmd="whoami">prints profile</CmdRow>
+            <CmdRow cmd="iddqd">god mode flair</CmdRow>
             <CmdRow cmd="git log">recent commits on GitHub</CmdRow>
           </Section>
 
