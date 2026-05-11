@@ -31,7 +31,7 @@ export function StatusBar() {
         <Sep />
       </span>
       <span className="hidden md:inline-flex shrink-0 items-center gap-1.5">
-        powered by Claude
+        human-paired with Claude
       </span>
       <span className="hidden md:contents">
         <Sep />

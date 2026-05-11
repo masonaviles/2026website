@@ -27,9 +27,6 @@ export function HeroPanel() {
           </span>
           <Cursor />
         </h1>
-        <p className="mb-4 font-mono text-[12.5px] text-accent">
-          {profile.subhead}
-        </p>
         <Tagline source={profile.tagline} />
 
         <div className="my-6 grid max-w-[580px] grid-cols-1 gap-2 min-[701px]:grid-cols-2">
