@@ -5,6 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
+import {
+  ACHIEVEMENT_IDS,
+  ACHIEVEMENTS,
+  type AchievementId,
+} from "@/lib/achievements/registry";
+import { useAchievements } from "@/lib/achievements/useAchievements";
 
 interface WorkspaceItem {
   label: string;
@@ -36,9 +42,30 @@ function isActive(pathname: string, href: string) {
  * The toggle event is decoupled (no shared state needed) — the
  * Hamburger button dispatches; the Rail listens.
  */
+const MAX_RAIL_ROWS = 3;
+
 export function Rail() {
   const pathname = usePathname() ?? "/";
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const achievementState = useAchievements();
+
+  // Build a deterministic list: latest unlocked first, then fill with the
+  // next wired-but-locked rows so the panel always shows ~3 entries.
+  const unlocked = Object.entries(achievementState.unlocked)
+    .filter(([id]) => (ACHIEVEMENT_IDS as readonly string[]).includes(id))
+    .map(([id, info]) => ({ id: id as AchievementId, at: info?.at ?? "" }))
+    .sort((a, b) => b.at.localeCompare(a.at));
+  const lockedWired = ACHIEVEMENT_IDS.filter(
+    (id) => ACHIEVEMENTS[id].wired && !achievementState.unlocked[id],
+  );
+  const railRows: { id: AchievementId; unlocked: boolean }[] = [
+    ...unlocked.slice(0, MAX_RAIL_ROWS).map((u) => ({ id: u.id, unlocked: true })),
+    ...lockedWired
+      .slice(0, Math.max(0, MAX_RAIL_ROWS - unlocked.length))
+      .map((id) => ({ id, unlocked: false })),
+  ];
+  const unlockedCount = unlocked.length;
+  const totalCount = ACHIEVEMENT_IDS.length;
 
   // Toggle event listener — decoupled comms with the Hamburger button.
   useEffect(() => {
@@ -135,11 +162,17 @@ export function Rail() {
       </div>
 
       <div>
-        <RailHeading>Achievements · 1/11</RailHeading>
+        <RailHeading>
+          Achievements · {unlockedCount}/{totalCount}
+        </RailHeading>
         <ul className="flex flex-col gap-0.5" role="list">
-          <AchievementRow unlocked label="hello_world" />
-          <AchievementRow label="curious_cat (locked)" />
-          <AchievementRow label="polyglot (locked)" />
+          {railRows.map((row) => (
+            <AchievementRow
+              key={row.id}
+              unlocked={row.unlocked}
+              label={row.unlocked ? row.id : `${row.id} (locked)`}
+            />
+          ))}
         </ul>
       </div>
     </div>
