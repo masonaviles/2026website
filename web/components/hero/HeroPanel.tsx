@@ -8,10 +8,7 @@ import { HeroCtas } from "./HeroCtas";
 
 export function HeroPanel() {
   return (
-    <section
-      className="grid items-start gap-6 pb-7 pt-1 sm:gap-7 sm:pt-2 max-[1100px]:grid-cols-1"
-      style={{ gridTemplateColumns: "1.4fr 1fr" }}
-    >
+    <section className="grid grid-cols-1 items-start gap-6 pb-7 pt-1 sm:gap-7 sm:pt-2 min-[1101px]:grid-cols-[1.4fr_1fr]">
       {/* Left column */}
       <div>
         <Eyebrow text={profile.statusChip} />
@@ -31,7 +28,7 @@ export function HeroPanel() {
         </h1>
         <Tagline source={profile.tagline} />
 
-        <div className="my-6 grid max-w-[580px] gap-2 max-[700px]:grid-cols-1 [grid-template-columns:repeat(2,1fr)]">
+        <div className="my-6 grid max-w-[580px] grid-cols-1 gap-2 min-[701px]:grid-cols-2">
           {profile.meta.map((row) => (
             <div
               key={row.key}
